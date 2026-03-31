@@ -36,7 +36,7 @@ public class StudyMaterial {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MaterialType materialType;
+    private Category category;
 
     private String subject;
 
@@ -58,8 +58,8 @@ public class StudyMaterial {
     @Column(updatable = false)
     private LocalDateTime uploadedAt;
 
-    public enum MaterialType {
-        NOTES, ASSIGNMENT, PAST_PAPER, REFERENCE_BOOK, OTHER
+    public enum Category {
+        PDF, IMAGE, PPT
     }
 
     public enum MaterialStatus {

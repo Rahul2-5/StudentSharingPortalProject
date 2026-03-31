@@ -42,6 +42,7 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .college(request.getCollege())
+                .program(request.getProgram())
                 .semester(request.getSemester())
                 .role("STUDENT")
                 .build();
@@ -58,6 +59,7 @@ public class AuthService {
                 .role(user.getRole())
                 .userId(user.getId())
                 .college(user.getCollege())
+                .program(user.getProgram())
                 .semester(user.getSemester())
                 .build();
     }
@@ -80,6 +82,7 @@ public class AuthService {
                 .role(user.getRole())
                 .userId(user.getId())
                 .college(user.getCollege())
+                .program(user.getProgram())
                 .semester(user.getSemester())
                 .build();
     }

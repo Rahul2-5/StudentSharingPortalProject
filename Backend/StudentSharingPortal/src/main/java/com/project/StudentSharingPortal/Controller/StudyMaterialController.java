@@ -31,13 +31,13 @@ public class StudyMaterialController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam("materialType") String materialType,
+            @RequestParam("category") String category,
             @RequestParam(value = "subject", required = false) String subject,
             @RequestParam(value = "semester", required = false) Integer semester,
             @AuthenticationPrincipal UserDetails userDetails) throws IOException {
 
         StudyMaterialDTO dto = studyMaterialService.upload(
-                file, title, description, materialType, subject, semester, userDetails.getUsername());
+                file, title, description, category, subject, semester, userDetails.getUsername());
         return ResponseEntity.ok(dto);
     }
 
@@ -46,10 +46,10 @@ public class StudyMaterialController {
     public ResponseEntity<List<StudyMaterialDTO>> getAll(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer semester,
-            @RequestParam(required = false) String materialType) {
+            @RequestParam(required = false) String category) {
 
-        if (keyword != null || semester != null || materialType != null) {
-            return ResponseEntity.ok(studyMaterialService.search(keyword, semester, materialType));
+        if (keyword != null || semester != null || category != null) {
+            return ResponseEntity.ok(studyMaterialService.search(keyword, semester, category));
         }
         return ResponseEntity.ok(studyMaterialService.getAll());
     }
@@ -92,5 +92,19 @@ public class StudyMaterialController {
     public ResponseEntity<List<StudyMaterialDTO>> getMyUploads(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(studyMaterialService.getMyUploads(userDetails.getUsername()));
+    }
+
+    /** Rate a document (requires auth) */
+    @PostMapping("/{id}/rate")
+    public ResponseEntity<?> rateMaterial(
+            @PathVariable Long id,
+            @RequestParam("score") int score,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            StudyMaterialDTO dto = studyMaterialService.rateMaterial(id, userDetails.getUsername(), score);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }

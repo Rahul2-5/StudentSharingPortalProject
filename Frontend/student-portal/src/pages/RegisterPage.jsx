@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { BookOpen, Mail, Lock, User, Building, Hash } from 'lucide-react';
+import { BookOpen, Mail, Lock, User, Building, Hash, Book } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
@@ -9,7 +9,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [form, setForm] = useState({
-    name: '', email: '', password: '', confirmPassword: '', college: '', semester: ''
+    name: '', email: '', password: '', confirmPassword: '', program: '', otherProgram: '', college: '', semester: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,8 +21,12 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password) {
-      setError('Name, email and password are required.');
+    if (!form.name || !form.email || !form.password || !form.program) {
+      setError('Name, email, password, and program are required.');
+      return;
+    }
+    if (form.program === 'Other' && !form.otherProgram.trim()) {
+      setError('Please specify your program.');
       return;
     }
     if (form.password !== form.confirmPassword) {
@@ -39,6 +43,7 @@ const RegisterPage = () => {
         name: form.name,
         email: form.email,
         password: form.password,
+        program: form.program === 'Other' ? form.otherProgram.trim() : form.program,
         college: form.college,
         semester: form.semester ? parseInt(form.semester) : null,
       };
@@ -104,6 +109,39 @@ const RegisterPage = () => {
               <input {...inputProps('confirmPassword', '••••••••', 'password')} autoComplete="new-password" style={{ paddingLeft: 16 }} />
             </div>
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Program</label>
+            <div style={{ position: 'relative' }}>
+              <Book size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+              <select name="program" value={form.program} onChange={handleChange} className="form-input" style={{ paddingLeft: 42 }}>
+                <option value="">Select your program</option>
+                <option value="B.Tech">B.Tech</option>
+                <option value="M.Tech">M.Tech</option>
+                <option value="BCA">BCA</option>
+                <option value="MCA">MCA</option>
+                <option value="B.Sc">B.Sc</option>
+                <option value="M.Sc">M.Sc</option>
+                <option value="BBA">BBA</option>
+                <option value="MBA">MBA</option>
+                <option value="B.Com">B.Com</option>
+                <option value="M.Com">M.Com</option>
+                <option value="B.A">B.A</option>
+                <option value="M.A">M.A</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          {form.program === 'Other' && (
+            <div className="form-group fade-in">
+              <label className="form-label">Specify Program</label>
+              <div style={{ position: 'relative' }}>
+                <BookOpen size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+                <input {...inputProps('otherProgram', 'E.g., Ph.D or BLIS', 'text', true)} />
+              </div>
+            </div>
+          )}
 
           <div className="auth-row">
             <div className="form-group">

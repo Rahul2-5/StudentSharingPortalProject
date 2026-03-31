@@ -8,7 +8,7 @@ const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [filters, setFilters] = useState({ keyword: '', semester: '', materialType: '' });
+  const [filters, setFilters] = useState({ keyword: '', semester: '', category: '' });
   const [debouncedKeyword, setDebouncedKeyword] = useState('');
 
   // Debounce search input
@@ -26,7 +26,7 @@ const DashboardPage = () => {
       const params = {};
       if (debouncedKeyword) params.keyword = debouncedKeyword;
       if (filters.semester) params.semester = filters.semester;
-      if (filters.materialType) params.materialType = filters.materialType;
+      if (filters.category) params.category = filters.category;
 
       const res = await api.get('/api/materials', { params });
       setMaterials(res.data);
@@ -35,7 +35,7 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedKeyword, filters.semester, filters.materialType]);
+  }, [debouncedKeyword, filters.semester, filters.category]);
 
   useEffect(() => {
     fetchMaterials();
@@ -84,15 +84,13 @@ const DashboardPage = () => {
             <select
               className="form-select"
               style={{ width: '160px' }}
-              value={filters.materialType}
-              onChange={(e) => setFilters(prev => ({ ...prev, materialType: e.target.value }))}
+              value={filters.category}
+              onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
             >
-              <option value="">All Types</option>
-              <option value="NOTES">Notes</option>
-              <option value="ASSIGNMENT">Assignment</option>
-              <option value="PAST_PAPER">Past Paper</option>
-              <option value="REFERENCE_BOOK">Reference Book</option>
-              <option value="OTHER">Other</option>
+              <option value="">All Categories</option>
+              <option value="PDF">PDF</option>
+              <option value="IMAGE">Image</option>
+              <option value="PPT">PowerPoint</option>
             </select>
           </div>
         </div>
@@ -115,10 +113,10 @@ const DashboardPage = () => {
             <Search size={48} />
             <h3>No materials found</h3>
             <p>We couldn't find any study materials matching your criteria.</p>
-            {(filters.keyword || filters.semester || filters.materialType) && (
+            {(filters.keyword || filters.semester || filters.category) && (
               <button
                 className="btn btn-ghost mt-4"
-                onClick={() => setFilters({ keyword: '', semester: '', materialType: '' })}
+                onClick={() => setFilters({ keyword: '', semester: '', category: '' })}
               >
                 Clear all filters
               </button>

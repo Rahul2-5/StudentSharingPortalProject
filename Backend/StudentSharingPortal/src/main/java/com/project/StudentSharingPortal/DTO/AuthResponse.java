@@ -16,5 +16,6 @@ public class AuthResponse {
     private String role;
     private Long userId;
     private String college;
+    private String program;
     private Integer semester;
 }

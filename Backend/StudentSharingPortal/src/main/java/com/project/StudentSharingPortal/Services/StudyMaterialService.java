@@ -1,8 +1,10 @@
 package com.project.StudentSharingPortal.Services;
 
 import com.project.StudentSharingPortal.DTO.StudyMaterialDTO;
+import com.project.StudentSharingPortal.Entity.DocumentRating;
 import com.project.StudentSharingPortal.Entity.StudyMaterial;
 import com.project.StudentSharingPortal.Entity.User;
+import com.project.StudentSharingPortal.Repository.DocumentRatingRepository;
 import com.project.StudentSharingPortal.Repository.StudyMaterialRepository;
 import com.project.StudentSharingPortal.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +30,16 @@ public class StudyMaterialService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DocumentRatingRepository ratingRepository;
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
     public StudyMaterialDTO upload(MultipartFile file,
                                    String title,
                                    String description,
-                                   String materialType,
+                                   String category,
                                    String subject,
                                    Integer semester,
                                    String uploaderEmail) throws IOException {
@@ -65,7 +70,7 @@ public class StudyMaterialService {
                 .filePath(filePath.toString())
                 .fileType(file.getContentType())
                 .fileSize(file.getSize())
-                .materialType(StudyMaterial.MaterialType.valueOf(materialType))
+                .category(StudyMaterial.Category.valueOf(category))
                 .subject(subject)
                 .semester(semester)
                 .downloadCount(0)
@@ -80,12 +85,12 @@ public class StudyMaterialService {
                 .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
-    public List<StudyMaterialDTO> search(String keyword, Integer semester, String materialType) {
-        StudyMaterial.MaterialType type = null;
-        if (materialType != null && !materialType.isBlank()) {
-            type = StudyMaterial.MaterialType.valueOf(materialType);
+    public List<StudyMaterialDTO> search(String keyword, Integer semester, String category) {
+        StudyMaterial.Category cat = null;
+        if (category != null && !category.isBlank()) {
+            cat = StudyMaterial.Category.valueOf(category);
         }
-        return studyMaterialRepository.searchMaterials(keyword, semester, type)
+        return studyMaterialRepository.searchMaterials(keyword, semester, cat)
                 .stream().map(this::toDTO).collect(Collectors.toList());
     }
 
@@ -148,7 +153,38 @@ public class StudyMaterialService {
         return toDTO(studyMaterialRepository.save(material));
     }
 
+    public StudyMaterialDTO rateMaterial(Long materialId, String raterEmail, int score) {
+        if (score < 1 || score > 5) {
+            throw new RuntimeException("Rating score must be between 1 and 5");
+        }
+
+        StudyMaterial material = studyMaterialRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("Material not found"));
+
+        User rater = userRepository.findByEmail(raterEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Prevent self-rating
+        if (material.getUploader().getEmail().equals(raterEmail)) {
+            throw new RuntimeException("You cannot rate your own uploaded document");
+        }
+
+        // Update existing rating or create a new one
+        DocumentRating rating = ratingRepository.findByMaterialAndRater(material, rater)
+                .orElse(DocumentRating.builder()
+                        .material(material)
+                        .rater(rater)
+                        .build());
+        rating.setScore(score);
+        ratingRepository.save(rating);
+
+        return toDTO(material);
+    }
+
     private StudyMaterialDTO toDTO(StudyMaterial m) {
+        Double avg = ratingRepository.findAverageScoreByMaterial(m);
+        Integer count = ratingRepository.countByMaterial(m);
+
         return StudyMaterialDTO.builder()
                 .id(m.getId())
                 .title(m.getTitle())
@@ -156,7 +192,7 @@ public class StudyMaterialService {
                 .fileName(m.getFileName())
                 .fileType(m.getFileType())
                 .fileSize(m.getFileSize())
-                .materialType(m.getMaterialType())
+                .category(m.getCategory())
                 .status(m.getStatus())
                 .subject(m.getSubject())
                 .semester(m.getSemester())
@@ -165,6 +201,8 @@ public class StudyMaterialService {
                 .uploaderName(m.getUploader().getName())
                 .uploaderId(m.getUploader().getId())
                 .uploaderCollege(m.getUploader().getCollege())
+                .averageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : null)
+                .ratingCount(count != null ? count : 0)
                 .build();
     }
 }
