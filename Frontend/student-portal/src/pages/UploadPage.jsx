@@ -10,7 +10,7 @@ const UploadPage = () => {
 
   const [file, setFile] = useState(null);
   const [form, setForm] = useState({
-    title: '', description: '', materialType: 'NOTES', subject: '', semester: ''
+    title: '', description: '', category: 'PDF', subject: '', semester: ''
   });
   const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -67,7 +67,7 @@ const UploadPage = () => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('title', form.title);
-    formData.append('materialType', form.materialType);
+    formData.append('category', form.category);
     if (form.description) formData.append('description', form.description);
     if (form.subject) formData.append('subject', form.subject);
     if (form.semester) formData.append('semester', form.semester);
@@ -145,13 +145,11 @@ const UploadPage = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div className="form-group">
-              <label className="form-label">Material Type *</label>
-              <select name="materialType" className="form-select" value={form.materialType} onChange={handleChange}>
-                <option value="NOTES">Notes</option>
-                <option value="ASSIGNMENT">Assignment</option>
-                <option value="PAST_PAPER">Past Paper</option>
-                <option value="REFERENCE_BOOK">Reference Book</option>
-                <option value="OTHER">Other</option>
+              <label className="form-label">Category *</label>
+              <select name="category" className="form-select" value={form.category} onChange={handleChange}>
+                <option value="PDF">PDF Document</option>
+                <option value="IMAGE">Image</option>
+                <option value="PPT">PowerPoint (PPT)</option>
               </select>
             </div>
             <div className="form-group">

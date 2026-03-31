@@ -19,7 +19,7 @@ public class StudyMaterialDTO {
     private String fileName;
     private String fileType;
     private Long fileSize;
-    private StudyMaterial.MaterialType materialType;
+    private StudyMaterial.Category category;
     private StudyMaterial.MaterialStatus status;
     private String subject;
     private Integer semester;
@@ -28,4 +28,6 @@ public class StudyMaterialDTO {
     private String uploaderName;
     private Long uploaderId;
     private String uploaderCollege;
+    private Double averageRating;
+    private Integer ratingCount;
 }

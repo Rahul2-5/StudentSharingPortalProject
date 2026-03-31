@@ -1,18 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  FileText, ClipboardList, BookMarked, BookOpen, File,
-  Download, Trash2, Calendar, User
+  FileText, Download, Trash2, Calendar, User, Star, Image as ImageIcon, Monitor, File
 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 const TYPE_CONFIG = {
-  NOTES:        { label: 'Notes',       icon: FileText,     className: 'notes',      badge: 'badge-purple' },
-  ASSIGNMENT:   { label: 'Assignment',  icon: ClipboardList, className: 'assignment', badge: 'badge-yellow' },
-  PAST_PAPER:   { label: 'Past Paper',  icon: BookMarked,   className: 'past_paper', badge: 'badge-red' },
-  REFERENCE_BOOK: { label: 'Reference', icon: BookOpen,     className: 'reference',  badge: 'badge-green' },
-  OTHER:        { label: 'Other',       icon: File,         className: 'other',      badge: 'badge-blue' },
+  PDF:   { label: 'PDF',   icon: FileText,   className: 'past_paper', badge: 'badge-red' },
+  IMAGE: { label: 'Image', icon: ImageIcon,  className: 'other',      badge: 'badge-blue' },
+  PPT:   { label: 'PPT',   icon: Monitor,    className: 'assignment', badge: 'badge-yellow' },
+  OTHER: { label: 'Other', icon: File,       className: 'notes',      badge: 'badge-purple' },
 };
 
 const formatFileSize = (bytes) => {
@@ -29,9 +27,26 @@ const formatDate = (dateStr) => {
 
 const MaterialCard = ({ material, onDelete, showActions = true }) => {
   const { user } = useAuth();
-  const config = TYPE_CONFIG[material.materialType] || TYPE_CONFIG.OTHER;
-  const IconComponent = config.icon;
+  const config = TYPE_CONFIG[material.category] || TYPE_CONFIG.OTHER;
+  
   const isOwner = user?.userId === material.uploaderId;
+
+  const [currentRating, setCurrentRating] = useState(material.averageRating || 0);
+  const [ratingCount, setRatingCount] = useState(material.ratingCount || 0);
+  const [hoverStar, setHoverStar] = useState(0);
+
+  const handleRate = async (score) => {
+    if (isOwner) return toast.error("You cannot rate your own document");
+    try {
+      const res = await api.post(`/api/materials/${material.id}/rate?score=${score}`);
+      setCurrentRating(res.data.averageRating);
+      setRatingCount(res.data.ratingCount);
+      toast.success('Rating submitted!');
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to submit rating');
+    }
+  };
+  const IconComponent = config.icon;
 
   const handleDownload = async () => {
     try {
@@ -92,6 +107,31 @@ const MaterialCard = ({ material, onDelete, showActions = true }) => {
         <span style={{ fontSize: '12px', color: 'var(--text-muted)', marginLeft: 'auto' }}>
           {formatFileSize(material.fileSize)}
         </span>
+      </div>
+
+      <div className="material-rating" style={{ display: 'flex', alignItems: 'center', marginTop: '14px', marginBottom: '10px', gap: '8px' }}>
+         <div 
+           style={{ display: 'flex', gap: '4px', cursor: isOwner ? 'default' : 'pointer' }}
+           onMouseLeave={() => setHoverStar(0)}
+         >
+           {[1, 2, 3, 4, 5].map((star) => (
+             <Star 
+               key={star} 
+               size={16} 
+               onMouseEnter={() => !isOwner && setHoverStar(star)}
+               onClick={() => !isOwner && handleRate(star)}
+               fill={(hoverStar || currentRating) >= star ? '#eab308' : 'none'} 
+               color={(hoverStar || currentRating) >= star ? '#eab308' : '#cbd5e1'} 
+               style={{ transition: 'all 0.2s', outline: 'none' }}
+             />
+           ))}
+         </div>
+         <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-main)' }}>
+           {currentRating ? currentRating.toFixed(1) : '0.0'} / 5
+         </span>
+         <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+           ({ratingCount} {ratingCount === 1 ? 'review' : 'reviews'})
+         </span>
       </div>
 
       <div className="material-footer">

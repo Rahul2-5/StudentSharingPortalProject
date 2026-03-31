@@ -22,11 +22,11 @@ public interface StudyMaterialRepository extends JpaRepository<StudyMaterial, Lo
     @Query("SELECT s FROM StudyMaterial s WHERE s.status = 'APPROVED' AND " +
            "(:keyword IS NULL OR LOWER(s.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(s.subject) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:semester IS NULL OR s.semester = :semester) AND " +
-           "(:materialType IS NULL OR s.materialType = :materialType) " +
+           "(:category IS NULL OR s.category = :category) " +
            "ORDER BY s.uploadedAt DESC")
     List<StudyMaterial> searchMaterials(
             @Param("keyword") String keyword,
             @Param("semester") Integer semester,
-            @Param("materialType") StudyMaterial.MaterialType materialType
+            @Param("category") StudyMaterial.Category category
     );
 }

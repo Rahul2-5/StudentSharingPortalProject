@@ -29,6 +29,8 @@ public class User {
 
     private String college;
 
+    private String program;
+
     private Integer semester;
 
     @Builder.Default
