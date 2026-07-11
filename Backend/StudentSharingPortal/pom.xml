@@ -74,11 +74,20 @@
 			<version>2.9.2</version>
 		</dependency>
 
-		<!-- Tess4J - Tesseract OCR Java bindings -->
+		<!-- Tess4J - Tesseract OCR Java bindings. Excludes its transitive PDFBox 3.x
+		     family (used only by tess4j's own PDF-to-image convenience methods, which
+		     this project never calls) because it is binary-incompatible with the
+		     PDFBox 2.x that tika-parser-pdf-module (2.9.2) is compiled against. -->
 		<dependency>
 			<groupId>net.sourceforge.tess4j</groupId>
 			<artifactId>tess4j</artifactId>
 			<version>5.11.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.pdfbox</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- OpenCV (Bytedeco) - image preprocessing before OCR -->
