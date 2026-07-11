@@ -1,6 +1,7 @@
 package com.project.StudentSharingPortal.Controller;
 
 import com.project.StudentSharingPortal.DTO.StudyMaterialDTO;
+import com.project.StudentSharingPortal.Services.AiSummaryService;
 import com.project.StudentSharingPortal.Services.StudyMaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -24,6 +25,9 @@ public class StudyMaterialController {
 
     @Autowired
     private StudyMaterialService studyMaterialService;
+
+    @Autowired
+    private AiSummaryService aiSummaryService;
 
     /** Upload a new study material (requires auth) */
     @PostMapping("/upload")
@@ -102,6 +106,20 @@ public class StudyMaterialController {
             @AuthenticationPrincipal UserDetails userDetails) {
         try {
             StudyMaterialDTO dto = studyMaterialService.rateMaterial(id, userDetails.getUsername(), score);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** Get or generate an AI summary for an approved material (requires auth) */
+    @PostMapping("/{id}/summarize")
+    public ResponseEntity<?> summarize(
+            @PathVariable Long id,
+            @RequestParam(value = "regenerate", defaultValue = "false") boolean regenerate,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            StudyMaterialDTO dto = aiSummaryService.getOrGenerateSummary(id, userDetails.getUsername(), regenerate);
             return ResponseEntity.ok(dto);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
