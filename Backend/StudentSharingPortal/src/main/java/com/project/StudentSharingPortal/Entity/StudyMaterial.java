@@ -58,6 +58,11 @@ public class StudyMaterial {
     @Column(updatable = false)
     private LocalDateTime uploadedAt;
 
+    @Column(columnDefinition = "LONGTEXT")
+    private String aiSummary;
+
+    private LocalDateTime aiSummaryGeneratedAt;
+
     public enum Category {
         PDF, IMAGE, PPT
     }

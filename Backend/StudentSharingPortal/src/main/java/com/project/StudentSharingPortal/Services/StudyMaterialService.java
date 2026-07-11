@@ -181,7 +181,7 @@ public class StudyMaterialService {
         return toDTO(material);
     }
 
-    private StudyMaterialDTO toDTO(StudyMaterial m) {
+    public StudyMaterialDTO toDTO(StudyMaterial m) {
         Double avg = ratingRepository.findAverageScoreByMaterial(m);
         Integer count = ratingRepository.countByMaterial(m);
 
@@ -203,6 +203,8 @@ public class StudyMaterialService {
                 .uploaderCollege(m.getUploader().getCollege())
                 .averageRating(avg != null ? Math.round(avg * 10.0) / 10.0 : null)
                 .ratingCount(count != null ? count : 0)
+                .aiSummary(m.getAiSummary())
+                .aiSummaryGeneratedAt(m.getAiSummaryGeneratedAt())
                 .build();
     }
 }

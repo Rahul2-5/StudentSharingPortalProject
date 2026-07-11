@@ -30,4 +30,6 @@ public class StudyMaterialDTO {
     private String uploaderCollege;
     private Double averageRating;
     private Integer ratingCount;
+    private String aiSummary;
+    private LocalDateTime aiSummaryGeneratedAt;
 }
