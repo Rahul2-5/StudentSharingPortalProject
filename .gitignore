@@ -1,0 +1,6 @@
+# JetBrains IDEs (IntelliJ IDEA, etc.) — matches .idea/ at any depth
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
