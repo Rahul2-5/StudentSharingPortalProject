@@ -33,6 +33,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configure(http))
             .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/materials/download/**").permitAll()
                 .requestMatchers("/api/materials").permitAll()
