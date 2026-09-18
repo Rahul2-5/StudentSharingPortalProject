@@ -106,6 +106,24 @@ public class StudyMaterialService {
         material.setDownloadCount(material.getDownloadCount() + 1);
         studyMaterialRepository.save(material);
 
+        return loadResource(material);
+    }
+
+    /** Load the file for inline preview WITHOUT counting it as a download. */
+    public Resource preview(Long id) throws MalformedURLException {
+        StudyMaterial material = studyMaterialRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Material not found"));
+        return loadResource(material);
+    }
+
+    /** The stored MIME type (e.g. application/pdf) used to render a preview. */
+    public String getContentType(Long id) {
+        StudyMaterial material = studyMaterialRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Material not found"));
+        return material.getFileType();
+    }
+
+    private Resource loadResource(StudyMaterial material) throws MalformedURLException {
         Path filePath = Paths.get(material.getFilePath());
         Resource resource = new UrlResource(filePath.toUri());
 
@@ -116,11 +134,16 @@ public class StudyMaterialService {
         }
     }
 
-    public void delete(Long id, String uploaderEmail) {
+    public void delete(Long id, String requesterEmail) {
         StudyMaterial material = studyMaterialRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Material not found"));
 
-        if (!material.getUploader().getEmail().equals(uploaderEmail)) {
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isOwner = material.getUploader().getEmail().equals(requesterEmail);
+        boolean isAdmin = "ADMIN".equals(requester.getRole());
+        if (!isOwner && !isAdmin) {
             throw new RuntimeException("You are not authorized to delete this material");
         }
 

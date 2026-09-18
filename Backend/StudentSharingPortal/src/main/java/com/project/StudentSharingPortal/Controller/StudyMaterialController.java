@@ -79,6 +79,21 @@ public class StudyMaterialController {
                 .body(resource);
     }
 
+    /** Stream file inline for preview (public). Does NOT count as a download. */
+    @GetMapping("/preview/{id}")
+    public ResponseEntity<Resource> preview(@PathVariable Long id) throws MalformedURLException {
+        Resource resource = studyMaterialService.preview(id);
+        String contentType = studyMaterialService.getContentType(id);
+        if (contentType == null || contentType.isBlank()) {
+            contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "inline; filename=\"" + resource.getFilename() + "\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .body(resource);
+    }
+
     /** Delete a material (auth + ownership) */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id,

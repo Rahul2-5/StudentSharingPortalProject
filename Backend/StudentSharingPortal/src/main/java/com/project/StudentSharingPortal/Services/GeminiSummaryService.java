@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,10 @@ public class GeminiSummaryService {
     private String model;
 
     public String summarize(String extractedText) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new RuntimeException("AI summary is not configured. Set the GEMINI_API_KEY environment variable and restart the backend.");
+        }
+
         String url = "https://generativelanguage.googleapis.com/v1beta/models/"
                 + model + ":generateContent?key=" + apiKey;
 
@@ -37,6 +42,8 @@ public class GeminiSummaryService {
         Map<String, Object> responseBody;
         try {
             responseBody = restTemplate.postForObject(url, requestBody, Map.class);
+        } catch (HttpStatusCodeException e) {
+            throw new RuntimeException("Gemini API error (" + e.getStatusCode().value() + "): " + e.getResponseBodyAsString());
         } catch (RestClientException e) {
             throw new RuntimeException("AI summary service is temporarily unavailable");
         }

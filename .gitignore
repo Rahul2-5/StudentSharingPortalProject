@@ -1,0 +1,4 @@
+Backend/StudentSharingPortal/application-local.properties
+**/target/
+Frontend/student-portal/node_modules/
+Frontend/student-portal/dist/
